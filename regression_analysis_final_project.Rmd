@@ -2,7 +2,9 @@
 title: "Regression Analysis Final Project"
 author: "Victoria Hamman"
 date: "`r Sys.Date()`"
-output: pdf_document
+output:
+  html_document:
+    df_print: paged
 ---
 
 ```{r setup, include=FALSE}
@@ -14,7 +16,8 @@ knitr::opts_chunk$set(echo = TRUE)
 1) Select Random Sample
 
 ```{r}
-
+library(dplyr)
+library(GGally)
 #load in csv file
 Diamonds_Prices <- read.csv("~/PSTAT/PSTAT 126/Final_Project/Diamonds Prices2022.csv", stringsAsFactors=T)
 
@@ -57,15 +60,19 @@ Cut is left-skewed and peaks at "Ideal". Color is right-skewed with a peak at E.
 ```{r}
 #3 quantitative variables: carat, table, price
 #2 categorical variables: cut, clarity
+Diamonds <- dplyr::select(rand_sample, carat, cut, clarity, table, price)
+head(Diamonds)
 
-#anova for numerical ~ categorical
-cat_model <- lm(price ~ cut + clarity, data=rand_sample)
-cat_correlation <- aov(cat_model)
-summary(cat_correlation)
-
-#car for numerical ~ numerical
-num_vars <- rand_sample[, c("carat", "table", "price")]
-cor(num_vars)
+#correlation for numerical variables
+#scatter plot
+diamonds_subset <- Diamonds %>%
+  select(where(is.numeric)) 
+ggpairs(
+  diamonds_subset,
+  title = "Scatterplot Matrix of Numerical Variables and Price",
+  progress = FALSE
+)
+cor(diamonds_subset)
 ```
 
 Both categorical variables (cut and clarity) are correlated to price. 
@@ -74,8 +81,8 @@ The quantitative variable "carat" is heavily correlated to price as the correlat
 
 4) Run the MLR Model using all the variables and its summary.
 ```{r}
-model <- lm(price ~ carat + cut + clarity + table, data=rand_sample)
-summary(aov(model))
+full_model <- lm(price ~ ., data=Diamonds)
+summary(aov(full_model))
 ```
 
 5) Comment on anything of interest from this part. 
@@ -85,3 +92,52 @@ One thing that surprised me was how little correlated table was with price. Tabl
 \newpage
 
 # PART 2: Simple Linear Regression
+
+1) Choose one predictor and one response. Conduct simple linear analysis on it.
+```{r}
+# choose response: price and predictor: carat
+
+#run simple linear regression
+simple <- lm(price ~ carat, data = Diamonds)
+summary(simple)
+
+#confidence interval for 0.05 significance level
+confint(simple, level=0.95)
+
+#prediction interval
+predict(simple, newdata=data.frame(carat=0.75), interval='prediction', level=0.95)
+
+#plot 
+plot(Diamonds$carat, Diamonds$price, xlab="Carat", ylab="Price",
+     main="Price vs Carat")
+abline(simple, col='blue', lwd=2)
+```
+
+2) Examine and interpret the result of the simple linear regression analysis.
+
+- Intercept: When carat is 0, price is -64.65.
+- Carat coefficient: When carat is increased by 1, price increases by 3686.73 dollars on average. 
+
+- Hypothesis testing:
+  $H_0$: $B_j = 0$: Carat is not a significant predictor of price.
+  $H_A$: $B_j \ne 0$: Carat is a significant predictor of price.
+
+- As the t-value for carat is 52.667, which is large, and has a very small p-value of <2.2e-16, we have evidence to reject the null. Carat does has a highly significant effect on price. 
+
+- $R^2_{adj}$: $R^2_{adj} =  0.7351$, which is very close to $R^2 = 0.7354$. This implies that there are no predictors in the model that shouldn't be included, meaning carat should be included because it is a significant predictor of price. As carat is the only predictor in the model, this means that carat accounts for the majority of the variation in price. 
+
+- RSE: The average error in the model from predicted values to observed values is 432.1 for 998 degrees of freedom (1000 samples). 
+
+- Overall model significance: The F-statistic is 2774 on 1 predictor and 998 degrees of freedom. This very large value alongside the very small p-value of <2.2e-16 shows that the overall model is very significant and the one predictor (carat) has a significant effect on the response (price).
+
+- Confidence Interval for slope: [3549.3685, 3824.10028]
+
+- Prediction value of price: 2700.399
+  95% prediction interval: [1852.037, 3548.76]
+  
+- Plot: The plot with regression line shows that price is clustered on the low end of carat until about 0.45 carat. After this, price is clustered (but more spread out) at carat higher than 0.45. 
+
+
+3) 
+
+
