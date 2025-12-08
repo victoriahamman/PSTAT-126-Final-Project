@@ -9,22 +9,79 @@ output: pdf_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
+# Part 1: Data Description and Descriptive Statistics
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+1) Select Random Sample
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+```{r}
 
-```{r cars}
-summary(cars)
+#load in csv file
+Diamonds_Prices <- read.csv("~/PSTAT/PSTAT 126/Final_Project/Diamonds Prices2022.csv", stringsAsFactors=T)
+
+#select random sample of 1000 rows
+set.seed(100)
+rand_sample <- Diamonds_Prices[sample(1000), ]
+
 ```
 
-## Including Plots
+2) Describe all the variables
 
-You can also embed plots, for example:
+```{r}
+summary(rand_sample)
+str(rand_sample)
+```
+Cut, color, and clarity are categorical variables. 
+X, carat, depth, table, price, x, y, and z are quantitative variables.
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r}
+# histograms for continuous quantitative variables
+hist(rand_sample$carat, xlab="Carat", main="Histogram of Carat")
+hist(rand_sample$depth, xlab="Depth", main="Histogram of Depth")
+hist(rand_sample$table, xlab="Table Size", main="Histogram of Table Size")
+hist(rand_sample$price, xlab="Price", main="Histogram of Price")
+hist(rand_sample$x, xlab="x", main="Histogram of x length")
+hist(rand_sample$y, xlab="y", main="Histogram of y length")
+hist(rand_sample$z, xlab="z", main="Histogram of z length")
+```
+The distributions of lengths x, y, and z are nearly identical with a large peak at approximately 75% of the range. Carat and depth are more normally distributed, with peaks around the middle of their range. Table size is heavily right-skewed. Price has two peaks of small ranges. The first is at the very beginning of the overall range, and the second is at the very end.
+
+```{r}
+#barplots for categorical variables
+barplot(table(rand_sample$cut), main="Plot of Cut")
+barplot(table(rand_sample$color), main="Plot of Color")
+barplot(table(rand_sample$clarity), main="Plot of Clarity")
+```
+Cut is left-skewed and peaks at "Ideal". Color is right-skewed with a peak at E. Clarity has two peaks at "Sl1" and "VS2".
+
+3) Determine correlation between chosen variables
+```{r}
+#3 quantitative variables: carat, table, price
+#2 categorical variables: cut, clarity
+
+#anova for numerical ~ categorical
+cat_model <- lm(price ~ cut + clarity, data=rand_sample)
+cat_correlation <- aov(cat_model)
+summary(cat_correlation)
+
+#car for numerical ~ numerical
+num_vars <- rand_sample[, c("carat", "table", "price")]
+cor(num_vars)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+Both categorical variables (cut and clarity) are correlated to price. 
+
+The quantitative variable "carat" is heavily correlated to price as the correlation value is very high at 0.857. The other quantitative variable "table" does not have a strong correlation with price, as its correlation value is only 0.068. 
+
+4) Run the MLR Model using all the variables and its summary.
+```{r}
+model <- lm(price ~ carat + cut + clarity + table, data=rand_sample)
+summary(aov(model))
+```
+
+5) Comment on anything of interest from this part. 
+
+One thing that surprised me was how little correlated table was with price. Table size should be related to the size of the diamond. Therefore, if the table is bigger, the diamond would be expected to be bigger and therefore more valuable. When considering this, the very low correlation is surprising. The regression summary relates to this because, even though it is significant, it is much less significant/a contributing factor to price than everything else is. Everything else appears as I expected it to.
+
+\newpage
+
+# PART 2: Simple Linear Regression
