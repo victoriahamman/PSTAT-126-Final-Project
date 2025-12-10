@@ -23,7 +23,7 @@ Diamonds_Prices <- read.csv("~/PSTAT/PSTAT 126/Final_Project/Diamonds Prices2022
 
 #select random sample of 1000 rows
 set.seed(100)
-rand_sample <- Diamonds_Prices[sample(1000), ]
+rand_sample <- Diamonds_Prices[sample(nrow(Diamonds_Prices), 1000), ]
 
 ```
 
@@ -46,7 +46,7 @@ hist(rand_sample$x, xlab="x", main="Histogram of x length")
 hist(rand_sample$y, xlab="y", main="Histogram of y length")
 hist(rand_sample$z, xlab="z", main="Histogram of z length")
 ```
-The distributions of lengths x, y, and z are nearly identical with a large peak at approximately 75% of the range. Carat and depth are more normally distributed, with peaks around the middle of their range. Table size is heavily right-skewed. Price has two peaks of small ranges. The first is at the very beginning of the overall range, and the second is at the very end.
+The distributions of lengths x and y are nearly identical with a slight right-skew. Carat is right-skewed. Table and depth are closer to being normally distributed. Price is right-skewed with a large peak at the lowest end. 
 
 ```{r}
 #barplots for categorical variables
@@ -54,7 +54,7 @@ barplot(table(rand_sample$cut), main="Plot of Cut")
 barplot(table(rand_sample$color), main="Plot of Color")
 barplot(table(rand_sample$clarity), main="Plot of Clarity")
 ```
-Cut is left-skewed and peaks at "Ideal". Color is right-skewed with a peak at E. Clarity has two peaks at "Sl1" and "VS2".
+Cut is left-skewed and peaks at "Ideal". Color is slightly right-skewed with a peak at G. Clarity has two peaks at "Sl1" and "VS2".
 
 3) Determine correlation between chosen variables
 ```{r}
@@ -75,9 +75,7 @@ ggpairs(
 cor(diamonds_subset)
 ```
 
-Both categorical variables (cut and clarity) are correlated to price. 
-
-The quantitative variable "carat" is heavily correlated to price as the correlation value is very high at 0.857. The other quantitative variable "table" does not have a strong correlation with price, as its correlation value is only 0.068. 
+The quantitative variable "carat" is heavily correlated to price as the correlation value is very high at 0.924. The other quantitative variable "table" does not have a strong correlation with price, as its correlation value is only 0.155. 
 
 4) Run the MLR Model using all the variables and its summary.
 ```{r}
@@ -87,7 +85,7 @@ summary(aov(full_model))
 
 5) Comment on anything of interest from this part. 
 
-One thing that surprised me was how little correlated table was with price. Table size should be related to the size of the diamond. Therefore, if the table is bigger, the diamond would be expected to be bigger and therefore more valuable. When considering this, the very low correlation is surprising. The regression summary relates to this because, even though it is significant, it is much less significant/a contributing factor to price than everything else is. Everything else appears as I expected it to.
+One thing that surprised me was how little correlated table was with price. Table size seems like it would be related to the size of the diamond. Therefore, if the table is bigger, the diamond would be expected to be bigger and therefore more valuable. When considering this, the very low correlation is surprising. The regression summary shows it is not significant as well. Everything else appears as I expected it to.
 
 \newpage
 
@@ -105,7 +103,7 @@ summary(simple)
 confint(simple, level=0.95)
 
 #prediction interval
-predict(simple, newdata=data.frame(carat=0.75), interval='prediction', level=0.95)
+predict(simple, newdata=data.frame(carat=1), interval='prediction', level=0.95)
 
 #plot 
 plot(Diamonds$carat, Diamonds$price, xlab="Carat", ylab="Price",
@@ -115,29 +113,169 @@ abline(simple, col='blue', lwd=2)
 
 2) Examine and interpret the result of the simple linear regression analysis.
 
-- Intercept: When carat is 0, price is -64.65.
-- Carat coefficient: When carat is increased by 1, price increases by 3686.73 dollars on average. 
+- Intercept: When carat is 0, price is -2332.1.
+- Carat coefficient: When carat is increased by 1, price increases by 7954.1 dollars on average. 
 
 - Hypothesis testing:
   $H_0$: $B_j = 0$: Carat is not a significant predictor of price.
   $H_A$: $B_j \ne 0$: Carat is a significant predictor of price.
 
-- As the t-value for carat is 52.667, which is large, and has a very small p-value of <2.2e-16, we have evidence to reject the null. Carat does has a highly significant effect on price. 
+- As the t-value for carat is 76.32, which is large, and has a very small p-value of <2.2e-16, we have evidence to reject the null. Carat does has a highly significant effect on price. 
 
-- $R^2_{adj}$: $R^2_{adj} =  0.7351$, which is very close to $R^2 = 0.7354$. This implies that there are no predictors in the model that shouldn't be included, meaning carat should be included because it is a significant predictor of price. As carat is the only predictor in the model, this means that carat accounts for the majority of the variation in price. 
+- $R^2_{adj}$: $R^2_{adj} =  0.8536$, which is very close to $R^2 = 0.8537$. This implies that there are no predictors in the model that shouldn't be included, meaning carat should be included because it is a significant predictor of price. As carat is the only predictor in the model, this means that carat accounts for the majority of the variation in price. 
 
-- RSE: The average error in the model from predicted values to observed values is 432.1 for 998 degrees of freedom (1000 samples). 
+- RSE: The average error in the model from predicted values to observed values is 1631 for 998 degrees of freedom (1000 samples). 
 
-- Overall model significance: The F-statistic is 2774 on 1 predictor and 998 degrees of freedom. This very large value alongside the very small p-value of <2.2e-16 shows that the overall model is very significant and the one predictor (carat) has a significant effect on the response (price).
+- Overall model significance: The F-statistic is 5825 on 1 predictor and 998 degrees of freedom. This very large value alongside the very small p-value of <2.2e-16 shows that the overall model is very significant and the one predictor (carat) has a significant effect on the response (price).
 
-- Confidence Interval for slope: [3549.3685, 3824.10028]
+- Confidence Interval for slope: [7749.611, 8158.637]
 
-- Prediction value of price: 2700.399
-  95% prediction interval: [1852.037, 3548.76]
+- Prediction value of price: 5622.014
+  95% prediction interval: [2418.693, 8825.336]
   
-- Plot: The plot with regression line shows that price is clustered on the low end of carat until about 0.45 carat. After this, price is clustered (but more spread out) at carat higher than 0.45. 
+- Plot: The plot with regression line shows that price is clustered around the low end of the regression line until around 1 carat. After this, the price fallows the regression line as carat increases, but it more spread out. 
 
 
-3) 
+3) Test assumptions and apply necessary transformations.
+
+```{r}
+residuals <- residuals(simple)
+fitted <- fitted(simple)
+
+#check linearity and homoscedasticity
+plot(Diamonds$carat, residuals, xlab="Carat", ylab="Residuals", 
+     main="Plot of Residuals vs. Carat")
+abline(h=0, col='red')
+
+plot(fitted, residuals, xlab="Fitted Values", ylab="Residuals",
+     main="Plot of Residual vs. Fitted Values")
+abline(h=0, col='red')
+
+#check if normality of residuals
+qqnorm(residuals)
+qqline(residuals, col='red')
+
+```
+Plots to test linearity and homoscedasticity are supposed to show a random scatter with no pattern. This is not this case here as they both show a funnel pattern, indicating non-linearity and heteroscedasticity. The QQ plot is supposed to have the points fall along the line to indicate normality. We do see this, indicating normality of residuals. 
+
+```{r}
+#apply necessary transformations and recheck assumptions
+
+#response first
+model_1 <- lm(log(price) ~ carat, data=Diamonds)
+plot(model_1)
+
+#now transform carat
+new_model <- lm(log(price) ~ log(carat), data=Diamonds)
+plot(new_model)
+```
+The transformations on both response and prictor variables show that the model is now linear and homoscedastic and well as improved normality. 
+
+4) Call the summery function on transformed variables.
+```{r}
+summary(new_model)
+```
+This transformed model has higher $R^2_{adj}$ and $R^2$ values. It also has higher t and F statistics indicating that this is an better model. 
+
+5) Add other variables and see if model improves. 
+```{r, echo=F, results='hide'}
+#idividually add in new variables one by one
+#table, depth, x, y, and z do not improve the model so exclude them
 
 
+#final model
+improved_model <- lm(log(price) ~ log(carat) + cut + clarity + color, data=rand_sample)
+summary(improved_model)
+```
+Of all the variables from the original data, carat, cut, clarity, and color $R^2_{adj)$ to the maximum value of 0.9843. Depth, table, x, y, and z do not improve on the model so they can be excluded.
+
+6) It was interesting to see how transforming the variables could improve the model. It was also interesting to see how adding variables improves the model or made no difference. It is very interesting to see that table, depth, x, y, and z all didn't improve the model.
+
+
+# Part 3: Continuation
+
+1) Find best model using AIC elimination
+```{r}
+library(MASS)
+full_model <- lm(log(price) ~ log(carat) + cut + clarity + color + table + depth + x + y + z, data=rand_sample)
+aic_model <- stepAIC(full_model, direction="both",
+                          trace=T)
+```
+The Stepwise AIC shows that including carat, cut, clarity, color, and x gives the best model. 
+
+
+2) Detect multicolinearity with VIF
+```{r}
+library(car)
+vif(aic_model)
+
+#remove x first (value of 9)
+model2 <- lm(log(price) ~ log(carat) + cut + clarity + color, data=rand_sample)
+aic_model2 <- stepAIC(model2, direction='both', trace=T)
+vif(aic_model2)
+
+# new AIC model shows that carat, cut, clarity, and color are the best predictors to have, vif confirms
+
+#final model
+final_model <- lm(log(price) ~ log(carat) + cut + clarity + color, data=rand_sample)
+plot(final_model)
+summary(final_model)
+```
+Final Linear Model: lm(price ~ carat + cut + clarity + color)
+Fits the assumptions. 
+
+3) Give CI for mean predicted value and PI for future predicted value for final linear model
+```{r}
+#chosen X: carat=1, cut='Ideal', color='G', clarity='SI1'
+vars <- data.frame(carat=1, 
+                   cut=factor('Ideal', levels=levels(rand_sample$cut)),
+                   color=factor('G', levels=levels(rand_sample$color)),
+                   clarity = factor('SI1', levels=levels(rand_sample$clarity)))
+
+
+#confidence interval for mean predicted value
+conf_log <- predict(final_model, newdata=vars, interval='confidence', level=0.95)
+#un-transform results 
+orig_conf <- exp(conf_log)
+orig_conf
+
+#prediction interval
+pred_log <- predict(final_model, newdata=vars, interval='prediction', level=0.95)
+#un-transform results
+pred_orig <- exp(pred_log)
+pred_orig
+```
+When Carat = 1, Cut = Ideal, Clarity = SI1, and Color = G
+Confidence Interval for predicted means:
+[4526.704, 4779.771]
+
+Prediction Interval for future predicted value:
+[3587.294, 6031.456]
+
+Prediction value of price: 4651.517 dollars
+
+4) Summary
+
+Part 1:
+
+From the Diamonds dataset, 1000 random samples were selected. After analyzing these samples we can see it contains 3 categorical variables: cut, clarity, and color, and 5 quantitative variables: carat, depth, table, price, x, y, and z.
+
+Looking at plots of these variables, we can see that most variables are roughly right-skewed or normal. The exceptions are cut and clarity which are left-skewed and bimodial respectively. 
+
+5 variables were chosen. 2 categorical: cut and clarity, and 3 quantitative: carat, table, and price. Using correlation analysis, carat is correlated with price, but table is not. The scatterplot matrix confirms this. Both categorical variables seem to be correlated as well.
+
+The multiple linear regression model confirmed that carat, cut, and clarity are significant predictors of price, but table is not. This coincides with the correlation analysis. 
+
+Part 2:
+
+In analyzing the simple linear relationship between price and carat, we get the regression line : price = -2.323.1 + 7954.1(carat). This model is statistically significant and so it carat in predicting price. 
+
+When testing assumptions, the simple linear model did not pass the linearity and homoscedasticity assumptions. Log transformations were applied to both, which improved the model. 
+
+Other variables were added into this model. A predictor was only kept in the model if it improved $R^2_{adj}$. This resulted in the improved model: log(price) ~ log(carat) + cat + clarity + color.
+
+Part 3:
+
+To make a final model, all of the variables (keeping the transformations to carat and price as they improve the model) were tested using stepwise AIC and VIF. This resulted in the same improved model as the last part: log(price) ~ log(carat) + cut + clarity + color. The the first run of AIC, x length was still included, but VIF showed that it had a high value, indicating multicollinearity with carat. Once x was removed from the model, all variables passed the multicollinearity test. 
+
+The assumptions were tested on the final model and all were passed. Transforming price and carat improved the model assumptions so they were kept in the final model. Carat is the most important predictor of price, but cut, clarity, and color are all significant factors in predicting price as well. This final model has a very high F-statistic and low p-value indicating it is a good model. $R^2$ and $R^2_{adj}$ match, showing there is no overfitting, and are very high indicting the model captures most of the variation in prices. 
